@@ -1,5 +1,5 @@
 # Your Product Name
-> Your Group Name
+> PostITivity
 
 > [!NOTE]
 > This repo has been shared with your group. Use it to develop your group project.
