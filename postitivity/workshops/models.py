@@ -12,7 +12,7 @@ class Workshop(models.Model):
    location = models.IntegerField(null=True, blank=True)
    coding_language = models.IntegerField(null=True, blank=True)
    organisation = models.IntegerField(null=True, blank=True)
-   is_archived = models.BooleanField()
+   is_archived = models.BooleanField(default=0)
    archive_id = models.IntegerField(null=True, blank=True)
 
 class Notes(models.Model):
@@ -24,5 +24,17 @@ class Notes(models.Model):
    note_category = models.IntegerField(null=True, blank=True)
    coding_language = models.IntegerField(null=True, blank=True)
    likes_count = models.IntegerField(default=0)
-   is_archived = models.BooleanField()
+   is_archived = models.BooleanField(default=0)
    archive_id = models.IntegerField(null=True, blank=True)
+
+class Location(models.Model):
+   location = models.CharField()
+   created_date = models.DateTimeField(auto_now_add=True)
+   added_by_user = models.IntegerField()
+   is_archived = models.BooleanField(default=0)
+
+class Cohorts(models.Model):
+   cohort_name = models.CharField()
+   added_by_user = models.IntegerField()
+   created_date = models.DateTimeField(auto_now_add=True)
+   is_archived = models.BooleanField(default=0)
