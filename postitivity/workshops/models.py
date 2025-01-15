@@ -82,6 +82,7 @@ class Organisation(models.Model):
 
 class Workshop(models.Model):
    title = models.CharField(max_length=200)
+   description = models.CharField()
    start_date = models.DateTimeField()
    end_date = models.DateTimeField()
    image_url = models.URLField(max_length=2000)
