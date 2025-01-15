@@ -46,7 +46,7 @@ class Note_category(models.Model):
    #  )
    is_archived = models.BooleanField()
 
- class Category(models.Model):
+class Category(models.Model):
    category_name = models.CharField()
    added_date = models.DateTimeField(auto_now_add=True)
    added_by_user = models.IntegerField()
