@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 
 class Location(models.Model):
-   location = models.CharField()
+   location = models.CharField(max_length=50)
    created_date = models.DateTimeField(auto_now_add=True)
    added_by_user = models.IntegerField()
       # models.ForeignKey(
@@ -14,7 +14,7 @@ class Location(models.Model):
    is_archived = models.BooleanField()
 
 class Cohorts(models.Model):
-   cohort_name = models.CharField()
+   cohort_name = models.CharField(max_length=50)
    added_by_user = models.IntegerField()
       # models.ForeignKey(
    #      get_user_model(),
@@ -25,7 +25,7 @@ class Cohorts(models.Model):
    is_archived = models.BooleanField()
 
 class Archive_details(models.Model):
-   archive_table = models.CharField()
+   archive_table = models.CharField(max_length=50)
    archive_date = models.DateTimeField(auto_now_add=True)
    archive_user = models.IntegerField()
       # models.ForeignKey(
@@ -33,10 +33,10 @@ class Archive_details(models.Model):
    #      on_delete=models.CASCADE,
    #      related_name='archived_items'
    #  )
-   archive_reason = models.CharField()
+   archive_reason = models.CharField(max_length=220)
 
 class Note_category(models.Model):
-   note_category_name = models.CharField()
+   note_category_name = models.CharField(max_length=50)
    added_date = models.DateTimeField(auto_now_add=True)
    added_by_user = models.IntegerField()
       # models.ForeignKey(
@@ -47,7 +47,7 @@ class Note_category(models.Model):
    is_archived = models.BooleanField()
 
 class Category(models.Model):
-   category_name = models.CharField()
+   category_name = models.CharField(max_length=50)
    added_date = models.DateTimeField(auto_now_add=True)
    added_by_user = models.IntegerField()
       # models.ForeignKey(
@@ -58,7 +58,7 @@ class Category(models.Model):
    is_archived = models.BooleanField()  
 
 class Coding_language(models.Model):
-   language = models.CharField()
+   language = models.CharField(max_length=50)
    added_date = models.DateTimeField(auto_now_add=True)
    added_by_user = models.IntegerField()
       # models.ForeignKey(
@@ -70,7 +70,7 @@ class Coding_language(models.Model):
 
 
 class Organisation(models.Model):
-   organisation_name = models.CharField()
+   organisation_name = models.CharField(max_length=100)
    added_date = models.DateTimeField(auto_now_add=True)
    added_by_user = models.IntegerField()
       # models.ForeignKey(
@@ -81,8 +81,8 @@ class Organisation(models.Model):
    is_archived = models.BooleanField()     
 
 class Workshop(models.Model):
-   title = models.CharField(max_length=200)
-   description = models.CharField()
+   title = models.CharField(max_length=220)
+   description = models.CharField(max_length=1000)
    start_date = models.DateTimeField()
    end_date = models.DateTimeField()
    image_url = models.URLField(max_length=2000)
@@ -122,7 +122,7 @@ class Workshop(models.Model):
          null=True, blank=True)
 
 class Notes(models.Model):
-   content = models.CharField(max_length=200)
+   content = models.CharField(max_length=220)
    user_id = models.IntegerField()
    # models.ForeignKey(
    #      get_user_model(),
