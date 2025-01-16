@@ -17,7 +17,7 @@ class OrganisationSerializer(serializers.ModelSerializer):
     members = CustomUserSerializer(source = 'members', many=True, read_only=True)
     added_by_user = CustomUserSerializer(many=False, read_only=True)
     class Meta:
-        model = apps.get_model('workshop.Organisation')
+        model = apps.get_model('workshops.Organisation')
         fields = ('id', 'organisation_name', 'organisation_workshops', 'members','added_date', 'added_by_user', 'is_archived')
         exta_kwargs = {'members': {'required': False},
                        'organisation_workshops': {'required': False}
