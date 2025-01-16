@@ -6,19 +6,22 @@ from users.serializers import CustomUserSerializer
 
 class NoteSerializer(serializers.ModelSerializer):
     added_by_user = CustomUserSerializer(many = False, read_only=True)
+    user = CustomUserSerializer(many=False, read_only=True)
     class Meta:
         model = apps.get_model('workshops.Notes')
         fields = '__all__'
 
 
 class OrganisationSerializer(serializers.ModelSerializer):
-    organisation_workshops = CustomUserSerializer(many = False, read_only=True)
+    organisation_workshops = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     members = CustomUserSerializer(source = 'members', many=True, read_only=True)
+    added_by_user = CustomUserSerializer(many=False, read_only=True)
     class Meta:
         model = apps.get_model('workshop.Organisation')
         fields = ('id', 'organisation_name', 'organisation_workshops', 'members','added_date', 'added_by_user', 'is_archived')
         exta_kwargs = {'members': {'required': False},
-                       'organisation_workshops': {'required': False}}
+                       'organisation_workshops': {'required': False}
+                    }
 
 class WorkshopSerializer(serializers.ModelSerializer):  
     notes = NoteSerializer(many=True, read_only=True)
@@ -39,7 +42,7 @@ class WorkshopDetailSerializer(WorkshopSerializer):
         instance.location = validated_data.get('location', instance.location)      
         instance.category = validated_data.get('category', instance.category)
         instance.coding_language = validated_data.get('coding_language', instance.coding_language)      
-        instance.organisation = validated_data.get('organisation', instance.category)
+        instance.organisation = validated_data.get('organisation', instance.organisation)
         instance.is_archived = validated_data.get('is_archived', instance.is_archived)
         instance.archive_details = validated_data.get('archive_details', instance.archive_details)
         instance.save()
@@ -52,7 +55,7 @@ class NoteDetailSerializer(NoteSerializer):
         instance.content = validated_data.get('content', instance.content)
         instance.workshop = validated_data.get('workshop', instance.workshop)
         instance.user = validated_data.get('user', instance.user)
-        instance.anonymous = validated_data.get('anoynymous', instance.anonymous)
+        instance.anonymous = validated_data.get('anonymous', instance.anonymous)
         instance.note_category = validated_data.get('note_category', instance.note_category)
         instance.coding_language = validated_data.get('coding_language', instance.coding_language)
         instance.likes_count = validated_data.get('likes_count', instance.likes_count)
