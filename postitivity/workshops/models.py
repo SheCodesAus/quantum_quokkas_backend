@@ -108,7 +108,7 @@ class Workshop(models.Model):
          related_name='organisation_workshops',
          null=True, blank=True)
    is_archived = models.BooleanField()
-   archive_id = models.ForeignKey(
+   archive = models.ForeignKey(
         'Archive_details',
          on_delete=models.CASCADE,
          related_name='archived_workshops',
@@ -116,11 +116,16 @@ class Workshop(models.Model):
 
 class Notes(models.Model):
    content = models.CharField(max_length=220)
-   user_id = models.ForeignKey(
+   user = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
         related_name='created_notes'
     )
+   workshop = models.ForeignKey(
+      'Workshop',
+      on_delete = models.CASCADE,
+      related_name= 'notes'
+   )
    anonymous = models.BooleanField()
    date_created = models.DateTimeField(auto_now_add=True)
    added_by_user = models.ForeignKey(
@@ -131,7 +136,7 @@ class Notes(models.Model):
    note_category = models.ForeignKey(
         'Note_category',
         on_delete=models.CASCADE,
-        related_name='notes',
+        related_name='cat_notes',
         null=True, blank=True
     )      
    coding_language = models.ForeignKey(
@@ -141,7 +146,7 @@ class Notes(models.Model):
          null=True, blank=True)
    likes_count = models.IntegerField()
    is_archived = models.BooleanField()
-   archive_id = models.ForeignKey(
+   archive = models.ForeignKey(
         'Archive_details',
          on_delete=models.CASCADE,
          related_name='archived_notes',
