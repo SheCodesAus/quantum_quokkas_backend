@@ -108,7 +108,7 @@ class Workshop(models.Model):
          related_name='organisation_workshops',
          null=True, blank=True)
    is_archived = models.BooleanField()
-   archive = models.ForeignKey(
+   archive_details = models.ForeignKey(
         'Archive_details',
          on_delete=models.CASCADE,
          related_name='archived_workshops',
@@ -146,7 +146,7 @@ class Notes(models.Model):
          null=True, blank=True)
    likes_count = models.IntegerField()
    is_archived = models.BooleanField()
-   archive = models.ForeignKey(
+   archive_details = models.ForeignKey(
         'Archive_details',
          on_delete=models.CASCADE,
          related_name='archived_notes',
