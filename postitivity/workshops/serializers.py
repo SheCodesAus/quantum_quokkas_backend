@@ -50,6 +50,7 @@ class OrganisationSerializer(serializers.ModelSerializer):
                        'organisation_workshops': {'required': False}
                     }
  
+#making a base serializer for workshops so we can pull workshop details in notes
 class WorkshopBaseSerializer(serializers.ModelSerializer):
     organisation = OrganisationSerializer(source='organisation', many=False, read_only=True)
     archive_details = ArchiveSerializer(source='archive_details', many=False, read_only=True)
@@ -69,6 +70,7 @@ class WorkshopBaseSerializer(serializers.ModelSerializer):
             'archive_details': {'required': False},
         }
 
+#use base workshop serializer in notes to pull workshop details
 class NoteSerializer(serializers.ModelSerializer):
     added_by_user = CustomUserSerializer(many=False, read_only=True)
     user = CustomUserSerializer(many=False, read_only=True)
@@ -76,7 +78,6 @@ class NoteSerializer(serializers.ModelSerializer):
     archive_details = ArchiveSerializer(many=False, read_only=True)
     coding_language = CodingLanguageSerializer(many=False, read_only=True)
     workshop = WorkshopBaseSerializer(many=False, read_only=True)
-
     class Meta:
         model = apps.get_model('workshops.Notes')
         fields = '__all__'
@@ -86,6 +87,7 @@ class NoteSerializer(serializers.ModelSerializer):
             'archive_details': {'required': False},
         }
 
+#make a workshopserializer using the base serializer and add notes details
 class WorkshopSerializer(WorkshopBaseSerializer):
     notes = NoteSerializer(many=True, read_only=True)
 
