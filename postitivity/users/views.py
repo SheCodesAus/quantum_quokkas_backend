@@ -70,6 +70,4 @@ class CustomAuthToken(ObtainAuthToken):
             'first_name': user.first_name,  # Include first name (if applicable)
         })
 
-
-
         
