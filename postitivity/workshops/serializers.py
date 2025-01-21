@@ -41,7 +41,7 @@ class CodingLanguageSerializer(serializers.ModelSerializer):
 
 class OrganisationSerializer(serializers.ModelSerializer):
    organisation_workshops = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-   members = CustomUserSerializer(source = 'members', many=True, read_only=True)
+   members = CustomUserSerializer(many=True, read_only=True) #deleted source
    added_by_user = CustomUserSerializer(many=False, read_only=True)
    class Meta:
        model = apps.get_model('workshops.Organisation')
