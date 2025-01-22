@@ -54,17 +54,17 @@ class OrganisationSerializer(serializers.ModelSerializer):
 
 #making a base serializer for workshops so we can pull workshop details in notes
 class WorkshopBaseSerializer(serializers.ModelSerializer):
-    organisation = OrganisationSerializer(many=False, read_only=True)  # Removed source='organisation'
-    archive_details = ArchiveSerializer(many=False, read_only=True)    # Removed source='archive_details'
-    location = LocationSerializer(many=False, read_only=True)          # Removed source='location'
-    category = CategorySerializer(many=False, read_only=True)          # Removed source='category'
+    organisation_id = OrganisationSerializer(source = 'organisation', many=False, read_only=True)  # Removed source='organisation'
+    archive_details_id = ArchiveSerializer(source = 'archive_details',many=False, read_only=True)    # Removed source='archive_details'
+    location_id = LocationSerializer( source = 'location', many=False, read_only=True)          # Removed source='location'
+    category_id = CategorySerializer(source = 'category', many=False, read_only=True)          # Removed source='category'
     owner = CustomUserSerializer(source='created_by_user', many=False, read_only=True)  # Kept this one since it maps to a different name
-    coding_language = CodingLanguageSerializer(many=False, read_only=True)  # Removed source='coding_language'
+    coding_language_id = CodingLanguageSerializer(source = 'coding_language', many=False, read_only=True)  # Removed source='coding_language'
     
     class Meta:
         model = apps.get_model('workshops.Workshop')
         fields = ('id', 'title', 'description', 'start_date', 'end_date', 
-                 'image_url', 'date_created', 'owner', 'location', 'category', 
+                 'image_url', 'date_created', 'owner', 'location', 'location_id', 'category', 
                  'coding_language', 'organisation', 'is_archived', 'archive_details')
         # Location is required, everything else optional
         extra_kwargs = {
