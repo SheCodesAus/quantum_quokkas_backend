@@ -23,15 +23,6 @@ class Cohorts(models.Model):
    created_date = models.DateTimeField(auto_now_add=True)
    is_archived = models.BooleanField(default=0)
 
-class Archive_details(models.Model):
-   archive_table = models.CharField(max_length=50)
-   archive_date = models.DateTimeField(auto_now_add=True)
-   archive_user = models.ForeignKey(
-        get_user_model(),
-        on_delete=models.CASCADE,
-        related_name='archived_items'
-    )
-   archive_reason = models.CharField(max_length=220)
 
 class Note_category(models.Model):
    note_category_name = models.CharField(max_length=50, unique=True)
@@ -108,8 +99,9 @@ class Workshop(models.Model):
          related_name='organisation_workshops',
          null=True, blank=True)
    is_archived = models.BooleanField(default=0)
-   archive_details = models.ForeignKey(
-        'Archive_details',
+   archive_reason = models.CharField(max_length=220, null=True, blank=True)
+   archive_user = models.ForeignKey(
+         get_user_model(),
          on_delete=models.CASCADE,
          related_name='archived_workshops',
          null=True, blank=True)
@@ -146,8 +138,9 @@ class Notes(models.Model):
          null=True, blank=True)
    likes_count = models.IntegerField(default=0)
    is_archived = models.BooleanField(default=0)
-   archive_details = models.ForeignKey(
-        'Archive_details',
+   archive_reason = models.CharField(max_length=220, null=True, blank=True)
+   archive_user = models.ForeignKey(
+         get_user_model(),
          on_delete=models.CASCADE,
          related_name='archived_notes',
          null=True, blank=True)

@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework import status, permissions
 from django.http import Http404
 from .models import Workshop, Notes, Location, Organisation
-from .serializers import WorkshopSerializer, NoteSerializer, WorkshopDetailSerializer, LocationSerializer, OrganisationSerializer, OrganisationDetailSerializer
+from .serializers import WorkshopSerializer, NoteSerializer, NoteDetailSerializer, WorkshopDetailSerializer, LocationSerializer, OrganisationSerializer, OrganisationDetailSerializer, LocationDetailSerializer
 from .permissions import IsOwnerOrReadOnly
 
 # Create your views here.
@@ -58,7 +58,8 @@ class WorkshopDetail(APIView):
         serializer = WorkshopDetailSerializer(
             instance=workshop,
             data=request.data,
-            partial=True #to allow partial updates
+            partial=True, #to allow partial updates
+            context={'request': request} # Add request to context
         )
         if serializer.is_valid():
             serializer.save(created_by_user=workshop.created_by_user)
@@ -84,7 +85,7 @@ class Notelist(APIView):
         if not serializer.is_valid():
             print("Errors:", serializer.errors)
         if serializer.is_valid():
-            note = serializer.save(
+            serializer.save(
                 user=request.user,
                 added_by_user=request.user,
                 workshop_id=request.data.get('workshop'),  # Add this line
@@ -99,8 +100,45 @@ class Notelist(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-# Create, View, Update location by ADMIN only
+
+class NoteDetail(APIView):
+ 
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        # IsOwnerOrReadOnly  --need a new note owner category - 
+    ]
+
+    def get_object(self, pk):
+        try:
+            note = Notes.objects.get(pk=pk)
+            self.check_object_permissions(self.request, note)
+            return note
+        except Notes.DoesNotExist:
+            raise Http404
+        
+    def get(self, request, pk):
+        note = self.get_object(pk=pk)
+        serializer=NoteDetailSerializer(note) #this where I added DETAILserializer to get the notes
+        return Response(serializer.data)
     
+    def put(self, request, pk):
+        note = self.get_object(pk)
+        serializer = NoteDetailSerializer(
+            instance=note,
+            data=request.data,
+            partial=True,
+            context={'request': request}  # Add request context
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+# Create, View, Update location by ADMIN only
 class LocationList (APIView):
     permission_classes = [IsAdminUser]  
     
@@ -132,12 +170,12 @@ class LocationDetail(APIView):
 
     def get(self, request, pk):
         location = self.get_object(pk)
-        serializer = LocationSerializer(location)
+        serializer = LocationDetailSerializer(location)
         return Response(serializer.data)
     
     def put(self, request, pk):
         location = self.get_object(pk)
-        serializer = LocationSerializer(
+        serializer = LocationDetailSerializer(
             instance=location,
             data=request.data,
             partial=True
@@ -187,9 +225,9 @@ class OrganisationDetail (APIView):
         return Response(serializer.data)
     
     def put(self, request, pk):
-        location = self.get_object(pk)
+        Organisation = self.get_object(pk)
         serializer = OrganisationDetailSerializer(
-            instance=location,
+            instance=Organisation,
             data=request.data,
             partial=True
         )
@@ -200,3 +238,4 @@ class OrganisationDetail (APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+
