@@ -7,19 +7,19 @@ class CohortSerializer(serializers.ModelSerializer):
    added_by_user = CustomUserSerializer(many = False, read_only=True)
    class Meta:
        model = apps.get_model('workshops.Cohorts')
-       fields = '__all__'
+       fields = ('id', 'cohort_name','added_by_user')
 
 class LocationSerializer(serializers.ModelSerializer):
    added_by_user = CustomUserSerializer(many = False, read_only=True)
    class Meta:
        model = apps.get_model('workshops.Location')
-       fields = '__all__'
+       fields = ('id', 'location','added_by_user')
 
 class NoteCategorySerializer(serializers.ModelSerializer):
    added_by_user = CustomUserSerializer(many = False, read_only=True)
    class Meta:
        model = apps.get_model('workshops.Note_category')
-       fields = '__all__'
+       fields = ('id', 'organisation_name','added_by_user')
 
 class CategorySerializer(serializers.ModelSerializer):
    added_by_user = CustomUserSerializer(many = False, read_only=True)
@@ -54,18 +54,19 @@ class OrganisationSerializer(serializers.ModelSerializer):
 
 #making a base serializer for workshops so we can pull workshop details in notes
 class WorkshopBaseSerializer(serializers.ModelSerializer):
-    organisation = OrganisationSerializer(many=False, read_only=True)  # Removed source='organisation'
-    archive_details = ArchiveSerializer(many=False, read_only=True)    # Removed source='archive_details'
-    location = LocationSerializer(many=False, read_only=True)          # Removed source='location'
-    category = CategorySerializer(many=False, read_only=True)          # Removed source='category'
-    owner = CustomUserSerializer(source='created_by_user', many=False, read_only=True)  # Kept this one since it maps to a different name
-    coding_language = CodingLanguageSerializer(many=False, read_only=True)  # Removed source='coding_language'
+    #changed these to map to _id as it is the only way to return all information on a foreign key (other methods will only return the 'id')
+    organisation_id = OrganisationSerializer(source = 'organisation', many=False, read_only=True)  
+    archive_details_id = ArchiveSerializer(source = 'archive_details',many=False, read_only=True)   
+    location_id = LocationSerializer( source = 'location', many=False, read_only=True)       
+    category_id = CategorySerializer(source = 'category', many=False, read_only=True)         
+    owner = CustomUserSerializer(source='created_by_user', many=False, read_only=True) 
+    coding_language_id = CodingLanguageSerializer(source = 'coding_language', many=False, read_only=True)  
     
     class Meta:
         model = apps.get_model('workshops.Workshop')
         fields = ('id', 'title', 'description', 'start_date', 'end_date', 
-                 'image_url', 'date_created', 'owner', 'location', 'category', 
-                 'coding_language', 'organisation', 'is_archived', 'archive_details')
+                 'image_url', 'date_created', 'owner', 'location', 'location_id', 'category', 'category_id',
+                 'coding_language', 'coding_language_id','organisation', 'organisation_id', 'is_archived', 'archive_details','archive_details_id')
         # Location is required, everything else optional
         extra_kwargs = {
             'category': {'required': False},

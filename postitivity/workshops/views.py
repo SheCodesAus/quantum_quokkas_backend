@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework import status, permissions
 from django.http import Http404
 from .models import Workshop, Notes, Location, Organisation
-from .serializers import WorkshopSerializer, NoteSerializer, WorkshopDetailSerializer, LocationSerializer, OrganisationSerializer
+from .serializers import WorkshopSerializer, NoteSerializer, WorkshopDetailSerializer, LocationSerializer, OrganisationSerializer, OrganisationDetailSerializer
 from .permissions import IsOwnerOrReadOnly
 
 # Create your views here.
@@ -87,7 +87,9 @@ class Notelist(APIView):
             note = serializer.save(
                 user=request.user,
                 added_by_user=request.user,
-                workshop_id=request.data.get('workshop')  # Add this line
+                workshop_id=request.data.get('workshop'),  # Add this line
+                likes_count=0,
+                is_archived=0
             )
             return Response(
                 serializer.data,
@@ -181,12 +183,12 @@ class OrganisationDetail (APIView):
 
     def get(self, request, pk):
         Organisation = self.get_object(pk)
-        serializer = OrganisationSerializer(Organisation)
+        serializer = OrganisationDetailSerializer(Organisation)
         return Response(serializer.data)
     
     def put(self, request, pk):
         location = self.get_object(pk)
-        serializer = OrganisationSerializer(
+        serializer = OrganisationDetailSerializer(
             instance=location,
             data=request.data,
             partial=True
