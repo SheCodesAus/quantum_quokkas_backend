@@ -54,12 +54,13 @@ class OrganisationSerializer(serializers.ModelSerializer):
 
 #making a base serializer for workshops so we can pull workshop details in notes
 class WorkshopBaseSerializer(serializers.ModelSerializer):
-    organisation_id = OrganisationSerializer(source = 'organisation', many=False, read_only=True)  # Removed source='organisation'
-    archive_details_id = ArchiveSerializer(source = 'archive_details',many=False, read_only=True)    # Removed source='archive_details'
-    location_id = LocationSerializer( source = 'location', many=False, read_only=True)          # Removed source='location'
-    category_id = CategorySerializer(source = 'category', many=False, read_only=True)          # Removed source='category'
-    owner = CustomUserSerializer(source='created_by_user', many=False, read_only=True)  # Kept this one since it maps to a different name
-    coding_language_id = CodingLanguageSerializer(source = 'coding_language', many=False, read_only=True)  # Removed source='coding_language'
+    #changed these to map to _id as it is the only way to return all information on a foreign key (other methods will only return the 'id')
+    organisation_id = OrganisationSerializer(source = 'organisation', many=False, read_only=True)  
+    archive_details_id = ArchiveSerializer(source = 'archive_details',many=False, read_only=True)   
+    location_id = LocationSerializer( source = 'location', many=False, read_only=True)       
+    category_id = CategorySerializer(source = 'category', many=False, read_only=True)         
+    owner = CustomUserSerializer(source='created_by_user', many=False, read_only=True) 
+    coding_language_id = CodingLanguageSerializer(source = 'coding_language', many=False, read_only=True)  
     
     class Meta:
         model = apps.get_model('workshops.Workshop')
