@@ -140,3 +140,17 @@ class OrganisationDetailSerializer(OrganisationSerializer):
        instance.is_archived = validated_data.get('is_archived', instance.is_archived)
        instance.save()
        return instance
+   
+class LocationDetailSerializer(LocationSerializer):
+   def update(self, instance, validated_data):
+       instance.location = validated_data.get('location', instance.organisation_name)
+       instance.is_archived = validated_data.get('is_archived', instance.is_archived)
+       instance.save()
+       return instance   
+   
+class ArchiveDetailSerializer(ArchiveSerializer):
+   def update(self, instance, validated_data):
+       instance.archive_table = validated_data.get('location', instance.archive_table)
+       instance.archive_reason = validated_data.get('is_archived', instance.archive_reason)
+       instance.save()
+       return instance      
