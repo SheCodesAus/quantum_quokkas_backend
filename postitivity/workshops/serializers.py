@@ -7,19 +7,19 @@ class CohortSerializer(serializers.ModelSerializer):
    added_by_user = CustomUserSerializer(many = False, read_only=True)
    class Meta:
        model = apps.get_model('workshops.Cohorts')
-       fields = '__all__'
+       fields = ('id', 'cohort_name','added_by_user')
 
 class LocationSerializer(serializers.ModelSerializer):
    added_by_user = CustomUserSerializer(many = False, read_only=True)
    class Meta:
        model = apps.get_model('workshops.Location')
-       fields = '__all__'
+       fields = ('id', 'location','added_by_user')
 
 class NoteCategorySerializer(serializers.ModelSerializer):
    added_by_user = CustomUserSerializer(many = False, read_only=True)
    class Meta:
        model = apps.get_model('workshops.Note_category')
-       fields = '__all__'
+       fields = ('id', 'organisation_name','added_by_user')
 
 class CategorySerializer(serializers.ModelSerializer):
    added_by_user = CustomUserSerializer(many = False, read_only=True)

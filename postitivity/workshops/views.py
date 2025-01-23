@@ -87,7 +87,9 @@ class Notelist(APIView):
             note = serializer.save(
                 user=request.user,
                 added_by_user=request.user,
-                workshop_id=request.data.get('workshop')  # Add this line
+                workshop_id=request.data.get('workshop'),  # Add this line
+                likes_count=0,
+                is_archived=0
             )
             return Response(
                 serializer.data,
