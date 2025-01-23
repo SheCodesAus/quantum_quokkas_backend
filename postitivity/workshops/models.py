@@ -11,7 +11,7 @@ class Location(models.Model):
         on_delete=models.CASCADE,
         related_name='created_locations'
     )
-   is_archived = models.BooleanField()
+   is_archived = models.BooleanField(default=0)
 
 class Cohorts(models.Model):
    cohort_name = models.CharField(max_length=50, unique=True)
@@ -21,7 +21,7 @@ class Cohorts(models.Model):
         related_name='created_cohorts'
     )
    created_date = models.DateTimeField(auto_now_add=True)
-   is_archived = models.BooleanField()
+   is_archived = models.BooleanField(default=0)
 
 class Archive_details(models.Model):
    archive_table = models.CharField(max_length=50)
@@ -41,7 +41,7 @@ class Note_category(models.Model):
         on_delete=models.CASCADE,
         related_name='created_note_categories'
     )
-   is_archived = models.BooleanField()
+   is_archived = models.BooleanField(default=0)
 
 class Category(models.Model):
    category_name = models.CharField(max_length=50, unique=True)
@@ -51,7 +51,7 @@ class Category(models.Model):
         on_delete=models.CASCADE,
         related_name='created_categories'
     )
-   is_archived = models.BooleanField()  
+   is_archived = models.BooleanField(default=0)  
 
 class Coding_language(models.Model):
    language = models.CharField(max_length=50, unique=True)
@@ -61,7 +61,7 @@ class Coding_language(models.Model):
         on_delete=models.CASCADE,
         related_name='created_languages'
     )
-   is_archived = models.BooleanField()  
+   is_archived = models.BooleanField(default=0)  
 
 
 class Organisation(models.Model):
@@ -72,7 +72,7 @@ class Organisation(models.Model):
         on_delete=models.CASCADE,
         related_name='added_organisation'
     )
-   is_archived = models.BooleanField()     
+   is_archived = models.BooleanField(default=0)     
 
 class Workshop(models.Model):
    title = models.CharField(max_length=220)
@@ -107,7 +107,7 @@ class Workshop(models.Model):
          on_delete=models.CASCADE,
          related_name='organisation_workshops',
          null=True, blank=True)
-   is_archived = models.BooleanField()
+   is_archived = models.BooleanField(default=0)
    archive_details = models.ForeignKey(
         'Archive_details',
          on_delete=models.CASCADE,
@@ -126,7 +126,7 @@ class Notes(models.Model):
       on_delete = models.CASCADE,
       related_name= 'notes'
    )
-   anonymous = models.BooleanField()
+   anonymous = models.BooleanField(default=0)
    date_created = models.DateTimeField(auto_now_add=True)
    added_by_user = models.ForeignKey(
         get_user_model(),
@@ -144,8 +144,8 @@ class Notes(models.Model):
          on_delete=models.CASCADE,
          related_name='language_notes',
          null=True, blank=True)
-   likes_count = models.IntegerField()
-   is_archived = models.BooleanField()
+   likes_count = models.IntegerField(default=0)
+   is_archived = models.BooleanField(default=0)
    archive_details = models.ForeignKey(
         'Archive_details',
          on_delete=models.CASCADE,
