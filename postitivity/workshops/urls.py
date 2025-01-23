@@ -11,5 +11,7 @@ urlpatterns = [
     path('locations/<int:pk>/', views.LocationDetail.as_view()),
     path('organisations/', views.OrganisationList.as_view()),
     path('organisations/<int:pk>/', views.OrganisationDetail.as_view()),
+    path('archive_details/', views.ArchiveList.as_view()),
+    path('archive_details/<int:pk>/', views.ArchiveDetail.as_view()),
 
 ]

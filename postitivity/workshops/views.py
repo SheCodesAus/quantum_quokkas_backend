@@ -205,11 +205,9 @@ class ArchiveList (APIView):
     permission_classes = [IsAdminUser]  
     
     def get(self, request):
-       def get_object(self, pk):
-        try:
-            return Archive_details.objects.get(pk=pk)
-        except Archive_details.DoesNotExist:
-            raise Http404
+        archives = Archive_details.objects.all()
+        serializer = ArchiveSerializer(archives, many=True)
+        return Response(serializer.data)
     
     def post(self, request):
         serializer = ArchiveSerializer(data=request.data)
@@ -223,6 +221,7 @@ class ArchiveList (APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+    
 class ArchiveDetail(APIView):
 
     def get_object(self, pk):
