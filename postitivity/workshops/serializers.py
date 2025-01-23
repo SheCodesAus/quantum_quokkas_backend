@@ -64,8 +64,8 @@ class WorkshopBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = apps.get_model('workshops.Workshop')
         fields = ('id', 'title', 'description', 'start_date', 'end_date', 
-                 'image_url', 'date_created', 'owner', 'location', 'location_id', 'category', 
-                 'coding_language', 'organisation', 'is_archived', 'archive_details')
+                 'image_url', 'date_created', 'owner', 'location', 'location_id', 'category', 'category_id',
+                 'coding_language', 'coding_language_id','organisation', 'organisation_id', 'is_archived', 'archive_details','archive_details_id')
         # Location is required, everything else optional
         extra_kwargs = {
             'category': {'required': False},
