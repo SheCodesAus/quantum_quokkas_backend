@@ -27,11 +27,6 @@ class CategorySerializer(serializers.ModelSerializer):
        model = apps.get_model('workshops.Category')
        fields = '__all__'
 
-class ArchiveSerializer(serializers.ModelSerializer):
-   added_by_user = CustomUserSerializer(many = False, read_only=True)
-   class Meta:
-       model = apps.get_model('workshops.Archive_details')
-       fields = '__all__'
 
 class CodingLanguageSerializer(serializers.ModelSerializer):
    added_by_user = CustomUserSerializer(many = False, read_only=True)
@@ -122,7 +117,7 @@ class WorkshopDetailSerializer(WorkshopSerializer):
         return instance
 
 class NoteDetailSerializer(NoteSerializer):
-    workshop = WorkshopDetailSerializer(many=False, read_only=True)
+    workshop = WorkshopBaseSerializer(many=False, read_only=True)
    
     def validate(self, data):
         if data.get('is_archived') == 1 and not data.get('archive_reason'):
@@ -153,10 +148,4 @@ class LocationDetailSerializer(LocationSerializer):
        instance.is_archived = validated_data.get('is_archived', instance.is_archived)
        instance.save()
        return instance   
-   
-class ArchiveDetailSerializer(ArchiveSerializer):
-   def update(self, instance, validated_data):
-       instance.archive_table = validated_data.get('location', instance.archive_table)
-       instance.archive_reason = validated_data.get('is_archived', instance.archive_reason)
-       instance.save()
-       return instance      
+      
