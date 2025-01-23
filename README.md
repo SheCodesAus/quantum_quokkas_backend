@@ -35,6 +35,7 @@
   - [Target Audience](#target-audience)
   - [Back-end Implementation](#back-end-implementation)
     - [API Specification](#api-specification)
+- [API Documentation](#api-documentation)
     - [Object Definitions](#object-definitions)
       - [Users](#users-1)
       - [Sticky Notes](#sticky-notes-1)
@@ -160,28 +161,34 @@ This website has two major target audiences: She Codes ‘Leaders, Volunteers & 
 ## Back-end Implementation
 ### API Specification
 
-| HTTP Method | URL                                 | Purpose                                                                                                                                  | Request Body                                                                                                       | Successful Response Code | Authentication and Authorization                      |
-| :---------- | :---------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- | :----------------------- | :---------------------------------------------------- |
-| POST        | /login                              | Allow users to log in                                                                                                                    | ““Username”:”string”, “password”:”string”                                                                          | 200                      | Token auth                                            |
-| POST        | /logout                             | Allow users to log out ( end active session)                                                                                             | ““Username”:”string”, “password”:”string”                                                                          | 200                      | Will clear user log in session \- remove stored token |
-| POST        | /Register                           | Create new student or approver user                                                                                                      | “Username”:”string”, “FullName”: “string” “Email”:”string”,”Password”:”string”, ”Password2”:”string”,              | 201                      | Admin                                                 |
-| PUT         | /Profile/ID                         | Edit user                                                                                                                                | “Username”:”string”, “FullName”: “string” “Email”:”string”, “Avatar”:”string”,  “Bio”:”string”, “Socials”:”string” | 200                      | Admin, approver or student with matching ID           |
-| GET         | /Profile/ID                         | View User profile                                                                                                                        | NA                                                                                                                 | 200                      | Any                                                   |
-| DELETE      | /User/ID                            | Delete user                                                                                                                              | NA                                                                                                                 | 204                      | Admin, approver or student with matching ID           |
-| POST        | /EventCollection                    | Create new Event Collection                                                                                                              | “Title”:”string”, “IsExported”:”boolean” “Approver”: integer                                                       | 201                      | Admin                                                 |
-| PUT         | /EventCollection/Id                 | Update Event collection                                                                                                                  | “Title”:”string”, “IsExported”:”boolean”                                                                           | 200                      | Admin, Approver linked to event?                      |
-| DELETE      | /EventCollection/Id                 | Delete Event collection                                                                                                                  | NA                                                                                                                 | 204                      | Admin                                                 |
-| POST        | /EventBoard/                        | Create new Event board                                                                                                                   | “Title”: “string”, “StartDate”:”datetime”, “EndDate:”datetime”                                                     | 201                      | Admin, approvers                                      |
-| PUT         | /EventBoard/ID                      | Update Event board                                                                                                                       | “Title”: “string”, “StartDate”:”datetime”, “EndDate:”datetime”                                                     | 200                      | Admin, approvers                                      |
-| DELETE      | /EventBoard/ID                      | Delete Event board                                                                                                                       | NA                                                                                                                 | 204                      | Admin or author of event                              |
-| GET         | /EventBoard/ID                      | Get Event board details                                                                                                                  | NA                                                                                                                 | 200                      | Open access                                           |
-| POST        | /stickyNote/                        | Create a new sticky note as Guest user                                                                                                   | “WinComment”:”string”                                                                                              | 201                      | Open access                                           |
-| GET         | /stickyNotes/?Status=Live\&Event.ID | Get Sticky notes for an event  Use query params to filter by event ID and Status                                                         | NA                                                                                                                 | 200                      | Open access                                           |
-| GET         | /stickyNotes/?Event.ID              | Get Sticky notes for an event                                                                                                            | NA                                                                                                                 | 200                      | Admin, approvers                                      |
-| GET         | /stickyNotes/                       | Export sticky notes as CSV (eg:response.setContentType("text/csv")) Can optionally filter by: event ID, Status, isexported, collectionId | NA                                                                                                                 | 200                      | Admin                                                 |
-| PUT         | /stickyNotes/ID                     | Edit sticky note, update status of sticky note to Approved or Archived                                                                   | “WinComment”:”string”                                                                                              | 200                      | Admin, approvers                                      |
-| POST        | /StickyStatus                       | Create available statuses for stickyNotes                                                                                                | “StatusName”:”string”                                                                                              | 201                      | Admin                                                 |
-| GET         | /StickyStatus                       | Get all statuses                                                                                                                         | NA                                                                                                                 | 200                      | Admin                                                 |
+# API Documentation
+
+Colors:
+- <span style="color:blue">**Blue**</span>: Required fields
+- <span style="color:magenta">**Magenta**</span>: Auto-filled fields
+
+| HTTP | URL | Purpose | Request Body | Success Response | Auth |
+|------|-----|---------|--------------|------------------|------|
+| POST | /users/ | Create new user | {<br><span style="color:blue">**"username"**</span>: "string",<br><span style="color:blue">**"password"**</span>: "string",<br>"first_name": "string",<br>"last_name": "string",<br>"email": "string",<br>"organisation": "int"<br>} | 201 Created | No |
+| POST | /api-token-auth/ | Login user | {<br><span style="color:blue">**"username"**</span>: "string",<br><span style="color:blue">**"password"**</span>: "string"<br>} | 200 OK | No |
+| GET | /workshops/ | List workshops | None | 200 OK | No |
+| POST | /workshops/ | Create workshop | {<br><span style="color:blue">**"title"**</span>: "string",<br><span style="color:blue">**"description"**</span>: "string",<br><span style="color:blue">**"start_date"**</span>: "datetime",<br><span style="color:blue">**"end_date"**</span>: "datetime",<br><span style="color:blue">**"location"**</span>: "int",<br>"image_url": "string",<br>"category": "int",<br>"coding_language": "int",<br>"organisation": "int",<br><span style="color:magenta">**"created_by_user"**</span>: "int"<br>} | 201 Created | Auth Required |
+| GET | /workshops/\<id>/ | Get workshop details | None | 200 OK | No |
+| PUT | /workshops/\<id>/ | Update workshop | {<br>"title": "string",<br>"description": "string",<br>"start_date": "datetime",<br>"end_date": "datetime",<br>"image_url": "string",<br>"location": "int",<br>"category": "int",<br>"coding_language": "int",<br>"organisation": "int",<br>"is_archived": "boolean",<br>"archive_details": "int"<br>} | 200 OK | Owner/Admin |
+| GET | /notes/ | List notes | None | 200 OK | No |
+| POST | /notes/ | Create note | {<br><span style="color:blue">**"content"**</span>: "string",<br><span style="color:blue">**"workshop"**</span>: "int",<br>"anonymous": "boolean",<br>"note_category": "int",<br>"coding_language": "int",<br><span style="color:magenta">**"user"**</span>: "int",<br><span style="color:magenta">**"added_by_user"**</span>: "int",<br><span style="color:magenta">**"likes_count"**</span>: "int",<br><span style="color:magenta">**"is_archived"**</span>: "boolean"<br>} | 201 Created | Auth Required |
+| GET | /notes/\<id>/ | Get note details | None | 200 OK | No |
+| PUT | /notes/\<id>/ | Update note | {<br>"content": "string",<br>"workshop": "int",<br>"anonymous": "boolean",<br>"note_category": "int",<br>"coding_language": "int",<br>"likes_count": "int",<br>"is_archived": "boolean",<br>"archive_details": "int"<br>} | 200 OK | Owner/Admin |
+| GET | /locations/ | List locations | None | 200 OK | Admin |
+| POST | /locations/ | Create location | {<br><span style="color:blue">**"location"**</span>: "string",<br><span style="color:magenta">**"added_by_user"**</span>: "int"<br>} | 201 Created | Admin |
+| GET | /locations/\<id>/ | Get location details | None | 200 OK | Admin |
+| PUT | /locations/\<id>/ | Update location | {<br>"location": "string",<br>"is_archived": "boolean"<br>} | 200 OK | Admin |
+| GET | /organisations/ | List organisations | None | 200 OK | Admin |
+| POST | /organisations/ | Create organisation | {<br><span style="color:blue">**"organisation_name"**</span>: "string",<br><span style="color:magenta">**"added_by_user"**</span>: "int"<br>} | 201 Created | Admin |
+| GET | /organisations/\<id>/ | Get organisation details | None | 200 OK | Admin |
+| PUT | /organisations/\<id>/ | Update organisation | {<br>"organisation_name": "string",<br>"is_archived": "boolean"<br>} | 200 OK | Admin |
+
+
 
 ### Object Definitions
 
