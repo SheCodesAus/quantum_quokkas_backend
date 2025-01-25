@@ -6,6 +6,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from .serializers import CustomUserSerializer
+from .permissions import IsOwnerOrReadOnly
 
 #View all users or create a new user
 
@@ -32,6 +33,9 @@ class CustomUserList(APIView):
 # View  for viewing and updating a specific user's details
 
 class CustomUserDetail(APIView):
+
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+
     def get_object(self, pk):
         User = get_user_model()
         try:
@@ -44,7 +48,7 @@ class CustomUserDetail(APIView):
         serializer = CustomUserSerializer(user)
         return Response(serializer.data)
     
-    def patch(self, request, pk):
+    def put(self, request, pk):
         user = self.get_object(pk)
         serializer = CustomUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
