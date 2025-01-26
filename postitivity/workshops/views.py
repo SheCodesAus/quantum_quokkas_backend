@@ -6,8 +6,35 @@ from django.http import Http404
 from .models import Workshop, Notes, Location, Organisation
 from .serializers import WorkshopSerializer, NoteSerializer, NoteDetailSerializer, WorkshopDetailSerializer, LocationSerializer, OrganisationSerializer, OrganisationDetailSerializer, LocationDetailSerializer
 from .permissions import IsOwnerOrReadOnly
+from datetime import date,timedelta
+from rest_framework import generics
+from django.db.models import Q 
 
 # Create your views here.
+
+class RecentNotesList(generics.ListAPIView):
+    serializer_class = NoteSerializer
+
+    def get_queryset(self):
+        today = date.today()
+        thirty_days_ago = today + timedelta(days=-30)
+        return Notes.objects.filter(
+            date_created__date__gt=thirty_days_ago,
+            date_created__date__lte=today,
+            is_archived=0
+        ).order_by('-date_created')
+
+class ActiveWorkshopsList(generics.ListAPIView):
+    serializer_class = WorkshopSerializer
+
+    def get_queryset(self):
+        thirty_days_ago = date.today() - timedelta(days=30)
+        today = date.today()
+        return Workshop.objects.filter(
+            (Q(start_date__gte=thirty_days_ago) & Q(start_date__lte=today)) |
+            Q(start_date=today),
+            is_archived=0
+        ).order_by('start_date')
 
 class WorkshopList(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
