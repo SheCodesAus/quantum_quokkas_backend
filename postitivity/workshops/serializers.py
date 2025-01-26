@@ -52,7 +52,7 @@ class NoteSerializer(serializers.ModelSerializer):
     added_by_user = CustomUserBriefSerializer(many=False, read_only=True)
     user = CustomUserBriefSerializer(many=False, read_only=True)
     archive_user = CustomUserBriefSerializer(many=False, read_only=True)
-    workshp_id = WorkshopBaseSerializer(source = 'workshop', many=False, read_only=True)
+    workshop_id = WorkshopBaseSerializer(source = 'workshop', many=False, read_only=True)
     class Meta:
         model = apps.get_model('workshops.Notes')
         fields = ('id','added_by_user','user','content','workshop', 'workshop_id', 'likes_count', 'anonymous','date_created','is_archived','archive_reason','archive_user')
