@@ -13,7 +13,7 @@ class LocationSerializer(serializers.ModelSerializer):
 
    class Meta:
        model = apps.get_model('workshops.Location')
-       fields = ('id', 'location')
+       fields = ('id', 'location','is_archived')
 
 class NoteCategorySerializer(serializers.ModelSerializer):
 
