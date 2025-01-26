@@ -68,10 +68,11 @@ class WorkshopSerializer(WorkshopBaseSerializer):
     location_id = LocationSerializer( source = 'location', many=False, read_only=True)              
     owner = CustomUserBriefSerializer(source='created_by_user', many=False, read_only=True) 
     archive_user = CustomUserBriefSerializer(many=False, read_only=True)
+    notes = NoteSerializer(many=True, read_only=True)
     class Meta:
         model = apps.get_model('workshops.Workshop')
         fields = WorkshopBaseSerializer.Meta.fields + ('description', 'start_date', 'end_date', 'date_created', 'owner', 'location', 
-                                                       'location_id', 'organisation', 'organisation_id', 'is_archived', 'archive_reason','archive_user')
+                                                       'location_id', 'organisation', 'organisation_id', 'is_archived', 'archive_reason','archive_user', 'notes')
             # Location is required, everything else optional
         extra_kwargs = {
             'organisation': {'required': False},
