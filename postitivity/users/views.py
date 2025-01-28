@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from .serializers import CustomUserSerializer
 from .permissions import IsOwnerOrReadOnly
 
+
 #View all users or create a new user
 
 class CustomUserList(APIView):
@@ -34,7 +35,7 @@ class CustomUserList(APIView):
 
 class CustomUserDetail(APIView):
 
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [ IsOwnerOrReadOnly]
 
     def get_object(self, pk):
         User = get_user_model()
