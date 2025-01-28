@@ -1,103 +1,84 @@
 from rest_framework import serializers
 from django.apps import apps
-from users.serializers import CustomUserSerializer
+from users.serializers import CustomUserSerializer, CustomUserBriefSerializer
 
 # Basic serializers for our core models
 class CohortSerializer(serializers.ModelSerializer):
-   added_by_user = CustomUserSerializer(many = False, read_only=True)
+
    class Meta:
        model = apps.get_model('workshops.Cohorts')
-       fields = ('id', 'cohort_name','added_by_user')
+       fields = ('id', 'cohort_name')
 
 class LocationSerializer(serializers.ModelSerializer):
-   added_by_user = CustomUserSerializer(many = False, read_only=True)
+
    class Meta:
        model = apps.get_model('workshops.Location')
-       fields = ('id', 'location','added_by_user')
+       fields = ('id', 'location','is_archived')
 
 class NoteCategorySerializer(serializers.ModelSerializer):
-   added_by_user = CustomUserSerializer(many = False, read_only=True)
+
    class Meta:
        model = apps.get_model('workshops.Note_category')
-       fields = ('id', 'organisation_name','added_by_user')
+       fields = ('id', 'note_category_name')
 
 class CategorySerializer(serializers.ModelSerializer):
-   added_by_user = CustomUserSerializer(many = False, read_only=True)
+
    class Meta:
        model = apps.get_model('workshops.Category')
-       fields = '__all__'
+       fields = ('id', 'category_name')
 
 
 class CodingLanguageSerializer(serializers.ModelSerializer):
-   added_by_user = CustomUserSerializer(many = False, read_only=True)
+
    class Meta:
        model = apps.get_model('workshops.Coding_language')
-       fields = '__all__'
+       fields = ('id', 'language')
 
 class OrganisationSerializer(serializers.ModelSerializer):
-   organisation_workshops = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-   members = CustomUserSerializer(many=True, read_only=True) #deleted source
-   added_by_user = CustomUserSerializer(many=False, read_only=True)
    class Meta:
        model = apps.get_model('workshops.Organisation')
-       fields = ('id', 'organisation_name', 'organisation_workshops', 'members',
-                'added_date', 'added_by_user', 'is_archived')
-       extra_kwargs = {
-           'members': {'required': False},
-           'organisation_workshops': {'required': False}
-       }
+       fields = ('id', 'organisation_name', 'is_archived')
+
 
 #making a base serializer for workshops so we can pull workshop details in notes
 class WorkshopBaseSerializer(serializers.ModelSerializer):
-    #changed these to map to _id as it is the only way to return all information on a foreign key (other methods will only return the 'id')
-    organisation_id = OrganisationSerializer(source = 'organisation', many=False, read_only=True)  
-    location_id = LocationSerializer( source = 'location', many=False, read_only=True)       
-    category_id = CategorySerializer(source = 'category', many=False, read_only=True)         
-    owner = CustomUserSerializer(source='created_by_user', many=False, read_only=True) 
-    coding_language_id = CodingLanguageSerializer(source = 'coding_language', many=False, read_only=True)  
-    archive_user = CustomUserSerializer(many=False, read_only=True)
-    
     class Meta:
         model = apps.get_model('workshops.Workshop')
-        fields = ('id', 'title', 'description', 'start_date', 'end_date', 
-                 'image_url', 'date_created', 'owner', 'location', 'location_id', 'category', 'category_id',
-                 'coding_language', 'coding_language_id','organisation', 'organisation_id', 'is_archived', 'archive_reason','archive_user')
-        # Location is required, everything else optional
-        extra_kwargs = {
-            'category': {'required': False},
-            'coding_language': {'required': False},
-            'organisation': {'required': False},
-            'archive_reason': {'required': False},
-            'archive_user': {'required': False},
-        }
+        fields = ('id', 'title')
+      
 
 #use base workshop serializer in notes to pull workshop details
 class NoteSerializer(serializers.ModelSerializer):
-    added_by_user = CustomUserSerializer(many=False, read_only=True)
-    user = CustomUserSerializer(many=False, read_only=True)
-    note_category = NoteCategorySerializer(many=False, read_only=True)
-    coding_language = CodingLanguageSerializer(many=False, read_only=True)
-    workshop = WorkshopBaseSerializer(many=False, read_only=True)
-    archive_user = CustomUserSerializer(many=False, read_only=True)
-
+    added_by_user = CustomUserBriefSerializer(many=False, read_only=True)
+    user = CustomUserBriefSerializer(many=False, read_only=True)
+    archive_user = CustomUserBriefSerializer(many=False, read_only=True)
+    workshop_id = WorkshopBaseSerializer(source = 'workshop', many=False, read_only=True)
     class Meta:
         model = apps.get_model('workshops.Notes')
-        fields = '__all__'
+        fields = ('id','added_by_user','user','content','workshop', 'workshop_id', 'likes_count', 'anonymous','date_created','is_archived','archive_reason','archive_user')
         extra_kwargs = {
-            'note_category': {'required': False},
-            'coding_language': {'required': False},
             'workshop': {'required': True}, #required in jSON when creating a new note
             'archive_reason' : {'required': False, 'allow_blank': True, 'allow_null': True},
             'archive_user': {'required': False, 'read_only': True}
         }
 
-
 #make a workshopserializer using the base serializer and add notes details
 class WorkshopSerializer(WorkshopBaseSerializer):
-   notes = NoteSerializer(many=True, read_only=True)
-
-   class Meta(WorkshopBaseSerializer.Meta):
-       fields = WorkshopBaseSerializer.Meta.fields + ('notes',)
+    organisation_id = OrganisationSerializer(source = 'organisation', many=False, read_only=True)  
+    location_id = LocationSerializer( source = 'location', many=False, read_only=True)              
+    owner = CustomUserBriefSerializer(source='created_by_user', many=False, read_only=True) 
+    archive_user = CustomUserBriefSerializer(many=False, read_only=True)
+    notes = NoteSerializer(many=True, read_only=True)
+    class Meta:
+        model = apps.get_model('workshops.Workshop')
+        fields = WorkshopBaseSerializer.Meta.fields + ('description', 'start_date', 'end_date', 'date_created', 'owner', 'location', 
+                                                       'location_id', 'organisation', 'organisation_id', 'is_archived', 'archive_reason','archive_user', 'notes')
+            # Location is required, everything else optional
+        extra_kwargs = {
+            'organisation': {'required': False},
+            'archive_reason': {'required': False},
+            'archive_user': {'required': False},
+        }
 
 class WorkshopDetailSerializer(WorkshopSerializer):
     def validate(self, data):
