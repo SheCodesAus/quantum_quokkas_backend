@@ -1,16 +1,39 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
 from rest_framework import status, permissions
 from django.http import Http404
 from .models import Workshop, Notes, Location, Organisation
 from .serializers import WorkshopSerializer, NoteSerializer, NoteDetailSerializer, WorkshopDetailSerializer, LocationSerializer, OrganisationSerializer, OrganisationDetailSerializer, LocationDetailSerializer
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAdminOwnerOrSuperuser, IsSuperUserOnly
 from datetime import date,timedelta
 from rest_framework import generics
 from django.db.models import Q 
 
-# Create your views here.
+from django.db.models import Count
+from django.db import models 
+
+
+# Count all workshops and notes
+class CountsView(APIView):
+    def get(self, request):
+        workshop_count = Workshop.objects.filter(is_archived=0).count()
+        note_count = Notes.objects.filter(is_archived=0).count()
+        
+        return Response({
+            'workshop_count': workshop_count,
+            'note_count': note_count
+        })
+
+# Count notes per workshop
+class WorkshopNotesCountView(APIView):
+    def get(self, request):
+        notes_per_workshop = Workshop.objects.filter(
+            is_archived=0
+        ).annotate(
+            note_count=Count('notes', filter=models.Q(notes__is_archived=0))
+        ).values('id', 'title', 'note_count')
+        
+        return Response(list(notes_per_workshop))
 
 class RecentNotesList(generics.ListAPIView):
     serializer_class = NoteSerializer
@@ -37,7 +60,7 @@ class ActiveWorkshopsList(generics.ListAPIView):
         ).order_by('start_date')
 
 class WorkshopList(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     def get(self, request):
         workshops = Workshop.objects.all()
@@ -61,11 +84,7 @@ class WorkshopList(APIView):
 
 class WorkshopDetail(APIView):
 
-    permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly
-    ]
-
+    permission_classes = [permissions.IsAuthenticated, IsAdminOwnerOrSuperuser]
 
     def get_object(self, pk):
         try:
@@ -98,7 +117,7 @@ class WorkshopDetail(APIView):
         )
 
 class Notelist(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOwnerOrSuperuser]
 
     def get(self, request):
         notes = Notes.objects.all()
@@ -129,11 +148,7 @@ class Notelist(APIView):
         )
 
 class NoteDetail(APIView):
- 
-    permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
-        # IsOwnerOrReadOnly  --need a new note owner category - 
-    ]
+    permission_classes = [IsAdminOwnerOrSuperuser]
 
     def get_object(self, pk):
         try:
@@ -167,7 +182,7 @@ class NoteDetail(APIView):
 
 # Create, View, Update location by ADMIN only
 class LocationList (APIView):
-    permission_classes = [IsAdminUser]  
+    permission_classes = [IsSuperUserOnly]  
     
     def get(self, request):
         locations = Location.objects.filter(is_archived=False)
@@ -187,7 +202,7 @@ class LocationList (APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 class LocationDetail(APIView):
-    permission_classes = [IsAdminUser] 
+    permission_classes = [IsSuperUserOnly] 
 
     def get_object(self, pk):
         try:
@@ -217,7 +232,7 @@ class LocationDetail(APIView):
 # Create, view, update organisations by ADMIN only
 
 class OrganisationList (APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsSuperUserOnly]
 
     def get(self, request):
         organisations = Organisation.objects.filter(is_archived=False)
@@ -238,7 +253,7 @@ class OrganisationList (APIView):
         )
 
 class OrganisationDetail (APIView):
-    permission_classes = [IsAdminUser] 
+    permission_classes = [IsSuperUserOnly] 
 
     def get_object(self, pk):
         try:

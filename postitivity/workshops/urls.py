@@ -14,5 +14,7 @@ urlpatterns = [
     path('locations/<int:pk>/', views.LocationDetail.as_view()),
     path('organisations/', views.OrganisationList.as_view()),
     path('organisations/<int:pk>/', views.OrganisationDetail.as_view()),
+    path('counts/', views.CountsView.as_view()),
+    path('workshops/notes-count/', views.WorkshopNotesCountView.as_view()),
 
 ]
