@@ -6,12 +6,14 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from .serializers import CustomUserSerializer
-from .permissions import IsOwnerOrReadOnly
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsAdminOrCreateOnly, IsOwnerOrAdmin 
 
 
 #View all users or create a new user
 
 class CustomUserList(APIView):
+    permission_classes = [IsAdminOrCreateOnly]
 
     def get(self, request):
         User = get_user_model()
@@ -35,17 +37,20 @@ class CustomUserList(APIView):
 
 class CustomUserDetail(APIView):
 
-    permission_classes = [ IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
 
     def get_object(self, pk):
         User = get_user_model()
         try:
-            return User.objects.get(pk=pk)    
+            user = User.objects.get(pk=pk)
+            self.check_object_permissions(self.request, user) 
+            return user
         except User.DoesNotExist:
             raise Http404
         
     def get(self, request, pk):
         user = self.get_object(pk)
+        self.check_object_permissions(request, user)
         serializer = CustomUserSerializer(user)
         return Response(serializer.data)
     
