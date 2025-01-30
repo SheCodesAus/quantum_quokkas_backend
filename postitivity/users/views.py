@@ -9,6 +9,7 @@ from .serializers import CustomUserSerializer
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAdminOrCreateOnly, IsOwnerOrAdmin 
 
+
 #View all users or create a new user
 
 class CustomUserList(APIView):
