@@ -30,20 +30,26 @@ class IsAdminOwnerOrSuperuser(permissions.BasePermission):
         return False
 
     def has_object_permission(self, request, view, obj):
+        
         # Step 1: If superuser, allow everything
         if request.user.is_superuser:
             return True
 
         # Step 2: If admin, check if they own the workshop
-        if request.user.is_staff:
-            if type(obj).__name__ == 'Workshop':
-                return obj.created_by_user == request.user
-            if type(obj).__name__ == 'Notes':
-                return obj.workshop.created_by_user == request.user
-
-        # Step 3: Regular users can edit their own notes
+       
+        if type(obj).__name__ == 'Workshop':
+            if request.method == 'GET':
+                return True
+            return request.user.is_staff and obj.created_by_user == request.user
+        
         if type(obj).__name__ == 'Notes':
-            return obj.user == request.user
+            # Regular users can only see/edit their own notes
+            if obj.user == request.user:
+                return True
+            # Staff can edit notes in workshops they created
+            if request.user.is_staff and obj.workshop.created_by_user == request.user:
+                return True
+            return False
 
         # Step 4: Regular users can't edit anything else
         return False
