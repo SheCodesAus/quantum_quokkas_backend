@@ -41,7 +41,9 @@ class CustomUserDetail(APIView):
     def get_object(self, pk):
         User = get_user_model()
         try:
-            return User.objects.get(pk=pk)    
+            user = User.objects.get(pk=pk)
+            self.check_object_permissions(self.request, user) 
+            return user
         except User.DoesNotExist:
             raise Http404
         
