@@ -25,7 +25,7 @@ class IsAdminOwnerOrSuperuser(permissions.BasePermission):
             return True
 
         # Step 5: Regular users - allow note creation but not workshop creation
-        if view.__class__.__name__ == 'NoteList':
+        if view.__class__.__name__ == 'Notelist':
             return True
         return False
 
