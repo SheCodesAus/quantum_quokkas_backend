@@ -1,16 +1,66 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
 from rest_framework import status, permissions
 from django.http import Http404
 from .models import Workshop, Notes, Location, Organisation
-from .serializers import WorkshopSerializer, NoteSerializer, WorkshopDetailSerializer, LocationSerializer, OrganisationSerializer, OrganisationDetailSerializer
-from .permissions import IsOwnerOrReadOnly
+from .serializers import WorkshopSerializer, NoteSerializer, NoteDetailSerializer, WorkshopDetailSerializer, LocationSerializer, OrganisationSerializer, OrganisationDetailSerializer, LocationDetailSerializer
+from .permissions import IsAdminOrReadOnly, IsAdminOwnerOrSuperuser, IsSuperUserOnly
+from datetime import date,timedelta
+from rest_framework import generics
+from django.db.models import Q 
 
-# Create your views here.
+from django.db.models import Count
+from django.db import models 
+
+
+# Count all workshops and notes
+class CountsView(APIView):
+    def get(self, request):
+        workshop_count = Workshop.objects.filter(is_archived=0).count()
+        note_count = Notes.objects.filter(is_archived=0).count()
+        
+        return Response({
+            'workshop_count': workshop_count,
+            'note_count': note_count
+        })
+
+# Count notes per workshop
+class WorkshopNotesCountView(APIView):
+    def get(self, request):
+        notes_per_workshop = Workshop.objects.filter(
+            is_archived=0
+        ).annotate(
+            note_count=Count('notes', filter=models.Q(notes__is_archived=0))
+        ).values('id', 'title', 'note_count')
+        
+        return Response(list(notes_per_workshop))
+
+class RecentNotesList(generics.ListAPIView):
+    serializer_class = NoteSerializer
+
+    def get_queryset(self):
+        today = date.today()
+        thirty_days_ago = today + timedelta(days=-30)
+        return Notes.objects.filter(
+            date_created__date__gt=thirty_days_ago,
+            date_created__date__lte=today,
+            is_archived=0
+        ).order_by('-date_created')
+
+class ActiveWorkshopsList(generics.ListAPIView):
+    serializer_class = WorkshopSerializer
+
+    def get_queryset(self):
+        thirty_days_ago = date.today() - timedelta(days=30)
+        today = date.today()
+        return Workshop.objects.filter(
+            (Q(start_date__gte=thirty_days_ago) & Q(start_date__lte=today)) |
+            Q(start_date=today),
+            is_archived=0
+        ).order_by('start_date')
 
 class WorkshopList(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
     def get(self, request):
         workshops = Workshop.objects.all()
@@ -34,11 +84,7 @@ class WorkshopList(APIView):
 
 class WorkshopDetail(APIView):
 
-    permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly
-    ]
-
+    permission_classes = [IsAdminOwnerOrSuperuser]
 
     def get_object(self, pk):
         try:
@@ -58,7 +104,8 @@ class WorkshopDetail(APIView):
         serializer = WorkshopDetailSerializer(
             instance=workshop,
             data=request.data,
-            partial=True #to allow partial updates
+            partial=True, #to allow partial updates
+            context={'request': request} # Add request to context
         )
         if serializer.is_valid():
             serializer.save(created_by_user=workshop.created_by_user)
@@ -70,7 +117,7 @@ class WorkshopDetail(APIView):
         )
 
 class Notelist(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOwnerOrSuperuser]
 
     def get(self, request):
         notes = Notes.objects.all()
@@ -84,7 +131,7 @@ class Notelist(APIView):
         if not serializer.is_valid():
             print("Errors:", serializer.errors)
         if serializer.is_valid():
-            note = serializer.save(
+            serializer.save(
                 user=request.user,
                 added_by_user=request.user,
                 workshop_id=request.data.get('workshop'),  # Add this line
@@ -99,10 +146,43 @@ class Notelist(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-# Create, View, Update location by ADMIN only
+
+class NoteDetail(APIView):
+    permission_classes = [IsAdminOwnerOrSuperuser]
+
+    def get_object(self, pk):
+        try:
+            note = Notes.objects.get(pk=pk)
+            self.check_object_permissions(self.request, note)
+            return note
+        except Notes.DoesNotExist:
+            raise Http404
+        
+    def get(self, request, pk):
+        note = self.get_object(pk=pk)
+        serializer=NoteDetailSerializer(note) #this where I added DETAILserializer to get the notes
+        return Response(serializer.data)
     
+    def put(self, request, pk):
+        note = self.get_object(pk)
+        serializer = NoteDetailSerializer(
+            instance=note,
+            data=request.data,
+            partial=True,
+            context={'request': request}  # Add request context
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+# Create, View, Update location by ADMIN only
 class LocationList (APIView):
-    permission_classes = [IsAdminUser]  
+    permission_classes = [IsSuperUserOnly]  
     
     def get(self, request):
         locations = Location.objects.filter(is_archived=False)
@@ -122,7 +202,7 @@ class LocationList (APIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 class LocationDetail(APIView):
-    permission_classes = [IsAdminUser] 
+    permission_classes = [IsSuperUserOnly] 
 
     def get_object(self, pk):
         try:
@@ -132,12 +212,12 @@ class LocationDetail(APIView):
 
     def get(self, request, pk):
         location = self.get_object(pk)
-        serializer = LocationSerializer(location)
+        serializer = LocationDetailSerializer(location)
         return Response(serializer.data)
     
     def put(self, request, pk):
         location = self.get_object(pk)
-        serializer = LocationSerializer(
+        serializer = LocationDetailSerializer(
             instance=location,
             data=request.data,
             partial=True
@@ -152,7 +232,7 @@ class LocationDetail(APIView):
 # Create, view, update organisations by ADMIN only
 
 class OrganisationList (APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsSuperUserOnly]
 
     def get(self, request):
         organisations = Organisation.objects.filter(is_archived=False)
@@ -173,7 +253,7 @@ class OrganisationList (APIView):
         )
 
 class OrganisationDetail (APIView):
-    permission_classes = [IsAdminUser] 
+    permission_classes = [IsSuperUserOnly] 
 
     def get_object(self, pk):
         try:
@@ -187,9 +267,9 @@ class OrganisationDetail (APIView):
         return Response(serializer.data)
     
     def put(self, request, pk):
-        location = self.get_object(pk)
+        Organisation = self.get_object(pk)
         serializer = OrganisationDetailSerializer(
-            instance=location,
+            instance=Organisation,
             data=request.data,
             partial=True
         )
@@ -200,3 +280,4 @@ class OrganisationDetail (APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+
