@@ -30,6 +30,9 @@ class IsAdminOwnerOrSuperuser(permissions.BasePermission):
         return False
 
     def has_object_permission(self, request, view, obj):
+
+        if request.method == 'GET':
+            return True
         
         # Step 1: If superuser, allow everything
         if request.user.is_superuser:

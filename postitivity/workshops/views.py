@@ -84,7 +84,7 @@ class WorkshopList(APIView):
 
 class WorkshopDetail(APIView):
 
-    permission_classes = [permissions.IsAuthenticated, IsAdminOwnerOrSuperuser]
+    permission_classes = [IsAdminOwnerOrSuperuser]
 
     def get_object(self, pk):
         try:
